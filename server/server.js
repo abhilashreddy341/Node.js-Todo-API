@@ -1,6 +1,7 @@
 
 var express = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -31,6 +32,18 @@ app.get('/todos',(req,res)=>{
   })
 })
 
+app.get('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send(`Id is not valid ${id}`);
+  }
+  Todo.findById(id).then((result)=>{
+    if(!result){
+    return  res.status(404).send(result);
+    }
+    res.send(result);
+  }).catch((e)=> res.status(404).send({}))
+})
 
 app.listen(3000,()=>{
   console.log('Server is up on port 3000');
