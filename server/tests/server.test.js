@@ -134,3 +134,21 @@ describe('DELETE / todos/id',()=>{
        .end(done);
   })
 })
+
+describe('/PATCH/todos/id',()=>{
+  it('should update the todo',(done)=>{
+    var id = name[0]._id.toHexString();
+    request(app)
+     .patch(`/todos/${id}`)
+     .send({
+       name : 'Abhi',
+       age : 23
+     })
+     .expect(200)
+     .expect((res)=>{
+       expect(res.body.result.name).toBe('Abhi');
+       expect(res.body.result.age).toBe(23);
+     })
+     .end(done);
+  })
+})
