@@ -1,3 +1,4 @@
+require('./config/config');
 
 const _ = require('lodash');
 var express = require('express');
@@ -9,8 +10,9 @@ var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 
+var port = process.env.PORT;
 var app = express();
-var port = process.env.PORT || 3000;
+
 
 app.use(bodyParser.json());
 
@@ -71,7 +73,6 @@ app.patch('/todos/:id',(req,res)=>{
 
   if(_.isBoolean(body.male)&&body.male){
     body.changedAt = new Date().getTime();
-    body.time = '5';
   }
   else{
     body.changedAt = null;
