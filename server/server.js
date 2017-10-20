@@ -41,7 +41,7 @@ app.get('/todos/:id',(req,res)=>{
     if(!result){
     return  res.status(404).send(result);
     }
-    res.send(result);
+    res.send({result});
   }).catch((e)=> res.status(404).send({}))
 })
 

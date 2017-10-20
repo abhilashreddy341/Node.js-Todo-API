@@ -1,13 +1,16 @@
 var expect = require('expect');
 var request = require('supertest');
+var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/todo');
 
 const name = [{
+  _id : new ObjectID('59e93eb794f75a3638d63c70'),
   name :'sairam',
   age : 15
 },{
+  _id :  new ObjectID('59e93eb794f75a3638d63c71'),
   name : 'ranjan',
   age : 19
 }] ;
@@ -68,5 +71,32 @@ describe('GET / todos',()=>{
      .expect((res)=>{
        expect(res.body.result.length).toBe(2);
      }).end(done);
+  })
+})
+
+describe('GET / todos/ id',()=>{
+  it('should get todo with given id',(done)=>{
+    request(app)
+     .get(`/todos/${name[0]._id.toHexString()}`)
+     .expect(200)
+     .expect((res)=>{
+       expect(res.body.result.name).toBe(name[0].name);
+     })
+     .end(done);
+  })
+
+  it('should return 404 for null',(done)=>{
+    var id = new ObjectID();
+    request(app)
+     .get(`/todos/${id.toHexString()}`)
+     .expect(404)
+     .end(done);
+
+  })
+  it('should return 404 for invalid id',(done)=>{
+    request(app)
+     .get('/todos/1234')
+     .expect(404)
+     .end(done);
   })
 })
