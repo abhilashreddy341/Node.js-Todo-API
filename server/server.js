@@ -46,6 +46,19 @@ app.get('/todos/:id',(req,res)=>{
   }).catch((e)=> res.status(404).send({}))
 })
 
+app.delete('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  if(!ObjectID.isValid(id)){
+    res.status(404).send(`Id is not valid ${id}`);
+  }
+  Todo.findByIdAndRemove(id).then((result)=>{
+    if(!result){
+      res.status(404).send('no collection is deleted');
+    }
+    res.send({result});
+  }).catch((e)=>res.status(400).send({}))
+})
+
 app.listen(3000,()=>{
   console.log(`Server is up on port: ${port}`);
 })
