@@ -91,12 +91,46 @@ describe('GET / todos/ id',()=>{
      .get(`/todos/${id.toHexString()}`)
      .expect(404)
      .end(done);
-
   })
   it('should return 404 for invalid id',(done)=>{
     request(app)
      .get('/todos/1234')
      .expect(404)
      .end(done);
+  })
+})
+
+describe('DELETE / todos/id',()=>{
+  it('should delete a document by id',(done)=>{
+    var id = name[0]._id.toHexString();
+    request(app)
+     .delete(`/todos/${id}`)
+     .expect(200)
+     .expect((res)=>{
+       expect(res.body.result._id).toBe(id);
+     })
+     .end((err,resu)=>{
+       if(err){
+         return done(err);
+      }
+    Todo.findById(id).then((res)=>{
+      expect(res).toEqual(null)
+      done();
+    }).catch((e)=>done(e));
+  });
+})
+
+  it('should return status 404 if no document is deleted',(done)=>{
+       request(app)
+        .delete('/todos/59e93eb794f75a3638d63c74')
+        .expect(404)
+        .end(done);
+  })
+
+  it('should return status 404 if object ID is invalid',(done)=>{
+      request(app)
+       .delete('/todos/123')
+       .expect(404)
+       .end(done);
   })
 })
