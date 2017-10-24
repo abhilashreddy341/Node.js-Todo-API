@@ -4,22 +4,10 @@ var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/todo');
+var {name,populateTodos,user,populateUsers} = require('./seed/seed');
 
-const name = [{
-  _id : new ObjectID('59e93eb794f75a3638d63c70'),
-  name :'sairam',
-  age : 15
-},{
-  _id :  new ObjectID('59e93eb794f75a3638d63c71'),
-  name : 'ranjan',
-  age : 19
-}] ;
-
-beforeEach((done)=>{
-  Todo.remove({}).then(()=>{
- return Todo.insertMany(name)
-    }).then(()=>done());
-})
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POSTS todo',()=>{
   it('should create a new todo',(done)=>{
@@ -150,5 +138,28 @@ describe('/PATCH/todos/id',()=>{
        expect(res.body.result.age).toBe(23);
      })
      .end(done);
+  })
+})
+
+describe('GET / user / me', ()=>{
+  it('should return user if authenticated',(done)=>{
+    request(app)
+     .get('/user/me')
+     .set('x-auth',user[0].tokens[0].token)
+     .expect(200)
+     .expect((res)=>{
+       expect(res.body._id).toBe(user[0]._id.toHexString());
+       expect(res.body.email).toBe(user[0].email);
+     })
+     .end(done);
+  })
+
+  it('should not return user if not authorized',(done)=>{
+    request(app)
+    .get('/user/me')
+    .expect(401)
+    .expect((res)=>{
+      expect(res.body).toEquals({});
+    }).end(done);
   })
 })
