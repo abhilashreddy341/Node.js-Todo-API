@@ -4,6 +4,7 @@ var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/todo');
+var {User} = require('./../models/user');
 var {name,populateTodos,user,populateUsers} = require('./seed/seed');
 
 beforeEach(populateUsers);
@@ -144,7 +145,7 @@ describe('/PATCH/todos/id',()=>{
 describe('GET / user / me', ()=>{
   it('should return user if authenticated',(done)=>{
     request(app)
-     .get('/user/me')
+     .get('/users/me')
      .set('x-auth',user[0].tokens[0].token)
      .expect(200)
      .expect((res)=>{
@@ -156,10 +157,58 @@ describe('GET / user / me', ()=>{
 
   it('should not return user if not authorized',(done)=>{
     request(app)
-    .get('/user/me')
+    .get('/users/me')
     .expect(401)
     .expect((res)=>{
-      expect(res.body).toEquals({});
+      expect(res.body).toEqual({});
     }).end(done);
+  });
+});
+
+describe(' POST / users',()=>{
+  it('should return user if user is created',(done)=>{
+   var email = 'abhilash123@gmail.com';
+   var password = 12345678;
+    request(app)
+     .post('/users')
+     .send({email, password})
+     .expect(200)
+     .expect((res)=>{
+       expect(res.headers['x-auth']).toExist();
+       expect(res.body._id).toExist();
+       expect(res.body.email).toBe(email)
+     })
+     .end((err)=>{
+       if(err){
+         done(err);
+       }
+       User.findOne({email}).then((res)=>{
+         expect(res.email).toBe(email);
+         expect(res.password).toNotBe(password);
+         done();
+       })
+
+     });
+  });
+
+  it('should return validation errors if request is invalid',(done)=>{
+    var email = 'abhilash123';
+    var password = 12345678;
+    request(app)
+     .post('/users')
+     .send({email,password})
+     .expect(400)
+     .end(done);
   })
-})
+
+  it('should return 404 if email already exists',(done)=>{
+    var email = 'akash123@gmail.com';
+    var password = 12345678;
+    request(app)
+     .post('/users')
+     .send({email,password})
+     .expect(400)
+     .end(done);
+  })
+
+});
