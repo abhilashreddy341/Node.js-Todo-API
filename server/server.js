@@ -71,6 +71,15 @@ app.get('/users/me',authenticate,(req,res)=>{
   res.send(req.user);
 });
 
+// DELETE/users/me/token
+app.delete('/users/me/token',authenticate,(req,res)=>{
+  req.user.removeToken(req.token).then(()=>{
+    res.status(200).send();
+  }).catch((e)=>{
+    res.status(400).send();
+  })
+})
+
 
 // GET/todos/id
 
@@ -127,6 +136,7 @@ app.patch('/todos/:id',(req,res)=>{
  })
 
 })
+
 
 app.listen(3000,()=>{
   console.log(`Server is up on port: ${port}`);
