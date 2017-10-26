@@ -16,17 +16,23 @@ const user = [{
   }]},{
     _id: userTwoId,
     email : 'prashanth123@gmail.com',
-    password : 'usertwopass'
+    password : 'usertwopass',
+    tokens: [{
+      access : 'auth',
+      token : jwt.sign({_id : userOneId,access : 'auth'},'123abc').toString()
+    }]
   }];
 
 const name = [{
   _id : new ObjectID('59e93eb794f75a3638d63c70'),
   name :'sairam',
-  age : 15
+  age : 15,
+  _creator : userOneId
 },{
   _id :  new ObjectID('59e93eb794f75a3638d63c71'),
   name : 'ranjan',
-  age : 19
+  age : 19,
+  _creator : userTwoId
 }] ;
 
 const populateTodos = (done)=>{

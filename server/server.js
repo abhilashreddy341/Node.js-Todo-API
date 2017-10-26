@@ -18,11 +18,12 @@ var app = express();
 app.use(bodyParser.json());
 
 // post/todos
-app.post('/todos',(req,res)=>{
+app.post('/todos',authenticate,(req,res)=>{
 
   var todo = new Todo({
     name : req.body.name,
     age : req.body.age,
+    _creator : req.user._id
   });
   todo.save().then((doc)=>{
     res.send(doc);
@@ -32,8 +33,10 @@ app.post('/todos',(req,res)=>{
 });
 
 // get/todos
-app.get('/todos',(req,res)=>{
-  Todo.find().then((result)=>{
+app.get('/todos',authenticate,(req,res)=>{
+  Todo.find({
+    _creator : req.user._id
+  }).then((result)=>{
     res.send({result});
   },(e)=>{
     res.status(400).send(e);
@@ -83,12 +86,16 @@ app.delete('/users/me/token',authenticate,(req,res)=>{
 
 // GET/todos/id
 
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id',authenticate,(req,res)=>{
   var id = req.params.id;
   if(!ObjectID.isValid(id)){
     return res.status(404).send(`Id is not valid ${id}`);
   }
-  Todo.findById(id).then((result)=>{
+  Todo.findOne({
+    _id : id,
+    _creator : req.user._id
+  }
+  ).then((result)=>{
     if(!result){
     return  res.status(404).send(result);
     }
@@ -102,7 +109,10 @@ app.delete('/todos/:id',(req,res)=>{
   if(!ObjectID.isValid(id)){
     res.status(404).send(`Id is not valid ${id}`);
   }
-  Todo.findByIdAndRemove(id).then((result)=>{
+  Todo.findOneAndRemove({
+    _id : id,
+    _creator : req.user._id
+  }).then((result)=>{
     if(!result){
       res.status(404).send('no collection is deleted');
     }
@@ -111,7 +121,7 @@ app.delete('/todos/:id',(req,res)=>{
 })
 
 // UPDATE/todos/id
-app.patch('/todos/:id',(req,res)=>{
+app.patch('/todos/:id',authenticate,(req,res)=>{
   var id = req.params.id;
   var body = _.pick(req.body,['name','age','male'])
 
@@ -126,7 +136,7 @@ app.patch('/todos/:id',(req,res)=>{
     body.changedAt = null;
     body.male = false;
   }
- Todo.findByIdAndUpdate(id,{$set :body},{new:true}).then((result)=>{
+ Todo.findOneAndUpdate({_id : id, _creator : req.user._id},{$set :body},{new:true}).then((result)=>{
    if(!result){
      return res.status(404).send({});
    }
