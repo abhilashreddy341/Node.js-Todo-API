@@ -252,12 +252,30 @@ describe('POST / users / login',()=>{
      })
      .end((err,res)=>{
        if(err){
-         done(err);
+        return  done(err);
        }
        User.findOne({email :user[1].email }).then((user)=>{
          expect(user.tokens.length).toBe(0);
          done();
        }).catch((e)=>done(e));
+     });
+  });
+});
+
+describe('DELETE / users/me/tokens',()=>{
+  it('should delete the token from the tokens array',(done)=>{
+    request(app)
+     .delete('users/me/token')
+     .set('x-auth',user[0].tokens[0].token)
+     .expect(200)
+     .end((err,res)=>{
+       if(err){
+         return done(err);
+       }
+       User.findById(user[0]._id).then((user)=>{
+         expect(user.tokens.length).toBe(0);
+         done()
+       }).catch((e)=>done(e))
      });
   });
 });

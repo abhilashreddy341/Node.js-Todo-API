@@ -90,7 +90,7 @@ UserSchema.methods.removeToken = function(token){
       tokens:{token}
     }
   });
-}
+};
 
 UserSchema.methods.toJSON =function(){
   var user = this;
