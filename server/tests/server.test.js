@@ -174,7 +174,7 @@ describe('/PATCH/todos/id',()=>{
        expect(res.body.result.age).toBe(23);
      })
      .end(done);
-  }) 
+  })
 
   it('should not update the todo created by other user',(done)=>{
     var id = name[0]._id.toHexString();
@@ -185,7 +185,7 @@ describe('/PATCH/todos/id',()=>{
        name : 'Abhi',
        age : 23
      })
-     .expect(401)
+     .expect(404)
      .end(done);
   })
 
@@ -314,7 +314,7 @@ describe('POST / users / login',()=>{
 describe('DELETE / users/me/tokens',()=>{
   it('should delete the token from the tokens array',(done)=>{
     request(app)
-     .delete('users/me/token')
+     .delete('/users/me/token')
      .set('x-auth',user[0].tokens[0].token)
      .expect(200)
      .end((err,res)=>{

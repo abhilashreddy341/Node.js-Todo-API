@@ -19,7 +19,7 @@ const user = [{
     password : 'usertwopass',
     tokens: [{
       access : 'auth',
-      token : jwt.sign({_id : userOneId,access : 'auth'},'123abc').toString()
+      token : jwt.sign({_id : userTwoId,access : 'auth'},'123abc').toString()
     }]
   }];
 
