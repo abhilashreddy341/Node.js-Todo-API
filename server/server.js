@@ -18,43 +18,48 @@ var app = express();
 app.use(bodyParser.json());
 
 // post/todos
-app.post('/todos',authenticate,(req,res)=>{
+app.post('/todos',authenticate,async(req,res)=>{
 
   var todo = new Todo({
     name : req.body.name,
     age : req.body.age,
     _creator : req.user._id
   });
-  todo.save().then((doc)=>{
+  try{
+  const doc = await todo.save()
     res.send(doc);
-  },(err)=>{
+  }
+  catch(err){
     res.status(400).send(err);
-  });
+  }
 });
 
 // get/todos
-app.get('/todos',authenticate,(req,res)=>{
-  Todo.find({
+app.get('/todos',authenticate,async(req,res)=>{
+  try{
+  const result = await Todo.find({
     _creator : req.user._id
-  }).then((result)=>{
-    res.send({result});
-  },(e)=>{
-    res.status(400).send(e);
   })
+    res.send({result});
+  }
+  catch(e){
+    res.status(400).send(e);
+  }
 })
 
 //post/users
-app.post('/users',(req,res)=>{
-  var body = _.pick(req.body,['email','password']);
-
-   var user = new User(body)
-  user.save().then(()=>{
-    return user.generateAuthToken();
-  }).then((token)=>{
-    res.header('x-auth',token).send(user);
-  }).catch((e)=>{
+app.post('/users',async(req,res)=>{
+  const body = _.pick(req.body,['email','password']);
+  const user = new User(body);
+  try
+  {
+  await user.save()
+  const token = user.generateAuthToken();
+  res.header('x-auth',token).send(user);
+  }
+  catch(e){
     res.status(400).send(e);
-  })
+  }
 });
 
 // POST/users/login
@@ -75,32 +80,38 @@ app.get('/users/me',authenticate,(req,res)=>{
 });
 
 // DELETE/users/me/token
-app.delete('/users/me/token',authenticate,(req,res)=>{
-  req.user.removeToken(req.token).then(()=>{
+app.delete('/users/me/token',authenticate,async(req,res)=>{
+  try{
+    await req.user.removeToken(req.token)
     res.status(200).send();
-  },()=>{
+  }
+ catch(e){
     res.status(400).send();
-  });
+  }
 });
 
 
 // GET/todos/id
 
-app.get('/todos/:id',authenticate,(req,res)=>{
+app.get('/todos/:id',authenticate,async(req,res)=>{
   var id = req.params.id;
   if(!ObjectID.isValid(id)){
     return res.status(404).send(`Id is not valid ${id}`);
   }
-  Todo.findOne({
-    _id : id,
-    _creator : req.user._id
+  try{
+    const result = await Todo.findOne({
+                              _id : id,
+                              _creator : req.user._id
+                            }
+    )
+      if(!result){
+      return  res.status(404).send(result);
+      }
+      res.send({result});
   }
-  ).then((result)=>{
-    if(!result){
-    return  res.status(404).send(result);
-    }
-    res.send({result});
-  }).catch((e)=> res.status(404).send({}))
+  catch(e){
+    res.status(404).send({})
+}
 })
 
 // DELETE/todos/id
